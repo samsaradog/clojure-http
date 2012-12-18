@@ -6,6 +6,9 @@
 	
 (defn concat-byte-arrays [a1 a2]
 	(byte-array (into (seq a2) (reverse (seq a1)))))
+
+(defn full-path [name root]
+	(str root "/" name))
 	
 ;-----------------------------------
 ; Help with extracting parameters from the command line or headers
@@ -21,9 +24,20 @@
 	
 ;-----------------------------------
 
-(defn file-response [uri root]
-	(let [result (concat-byte-arrays success-header default-response-header)]
-	(concat-byte-arrays result default-content)))
+(defn assemble-file-response [file-data]
+	(let [response-header 
+			(cond (is-gif-header?  file-data) gif-response-header
+			      (is-png-header?  file-data) png-response-header
+			      (is-jpeg-header? file-data) jpeg-response-header
+			      :else default-response-header)
+		  part1 (concat-byte-arrays success-header response-header)]
+		  (concat-byte-arrays part1 file-data)))
+
+(defn file-response [content root]
+	(let [uri (extract-uri (first content))
+	      filename (full-path uri root)
+	      file-data (read-binary-file filename)]
+	(assemble-file-response file-data)))
 
 ;-----------------------------------
 
@@ -31,7 +45,8 @@
 	(map #(str "<a href=\"/" % "\">" % "</a><br />") filelist))
 		
 (defn directory-content [uri root]
-	(let [listing (apply str (files-to-links (directory-files uri root)))]
+	(let [directory-name (full-path uri root)
+	      listing (apply str (files-to-links (directory-files directory-name)))]
 	(.getBytes listing)))
 
 (defn directory-response [content root]
@@ -45,8 +60,13 @@
 	(let [result (concat-byte-arrays not-found-header default-response-header)]
     (concat-byte-arrays result not-found-content)))
 
+(defn redirect-response-header [host-id]
+	(.getBytes ( str "Location: http://" host-id "/\n" default-response-string)))
+
 (defn redirect-response [content root]
-	(let [result (concat-byte-arrays redirect-header redirect-response-header)]
+	(let [host-id (second (split (second content) #"\s"))
+	      result (concat-byte-arrays redirect-header 
+					(redirect-response-header host-id))]
     (concat-byte-arrays result default-content)))
 
 (defn parameter-response [content root]
@@ -56,17 +76,17 @@
 
 ;------------------------------------
 
-(def get-controller (hash-map is-redirect?    redirect-response,
-                              has-parameters? parameter-response,
-                              is-file?        file-response,
-                              is-directory?   directory-response))
+(def controller-for-get (hash-map is-redirect?    redirect-response,
+                                  has-parameters? parameter-response,
+                                  is-file?        file-response,
+                                  is-directory?   directory-response))
 
 (defn response-to-get [content root]
     (let [first-line (first content)
 		  uri (extract-uri first-line)]
 
-         (or (first (for [f (keys get-controller) :when (f uri root)] 
-                         ((get get-controller f) content root)))
+         (or (first (for [f (keys controller-for-get) :when (f uri root)] 
+                         ((get controller-for-get f) content root)))
                   (not-found-response))))
 
 ;-----------------------------------

@@ -6,8 +6,8 @@
 
 (def default-response-string "Content-Type: text/html; charset=utf-8\n\n")
 (def default-response-header (.getBytes default-response-string))
-(def redirect-response-header (.getBytes ( str "Location: http://localhost:3456/\n"
-                                     default-response-string)))
+;(def redirect-response-header (.getBytes ( str "Location: http://localhost:3456/\n"
+;                                     default-response-string)))
 
 (def gif-response-header  (.getBytes "Content-type: image/gif\n\n"))
 (def png-response-header  (.getBytes "Content-type: image/png\n\n"))
