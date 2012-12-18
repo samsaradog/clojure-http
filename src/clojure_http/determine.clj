@@ -23,7 +23,7 @@
 	(= "POST" (extract-command line)))
 
 (defn has-parameters? [uri root]
-    (string-contains? #"=" uri))
+    (string-contains? #"\?" uri))
 
 (defn is-redirect? [uri root]
     (string-contains? #"redirect" uri))

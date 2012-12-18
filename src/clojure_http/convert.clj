@@ -2,6 +2,7 @@
 	(:use [clojure-http.define])	
 	(:use [clojure-http.system])	
 	(:use [clojure-http.determine])
+	(:use [clojure-http.decode])
 	(:use [clojure.string :only (split join replace)]))
 	
 (defn concat-byte-arrays [a1 a2]
@@ -19,8 +20,9 @@
 (defn params [s] (split (last (split s #"\?")) #"&"))
 
 (defn format-params [s]
-	(let [result (join "\n" (map (fn [x] (pad-equal x)) (params s)))]
-	(.getBytes result)))
+	(let [result (join "\n" (map (fn [x] (pad-equal x)) (params s)))
+	      decoded-result (decode result)]
+	(.getBytes decoded-result)))
 	
 ;-----------------------------------
 
@@ -71,7 +73,7 @@
 
 (defn parameter-response [content root]
 	(let [first-line (first content)
-	      result (concat-byte-arrays not-found-header default-response-header)]
+	      result (concat-byte-arrays success-header default-response-header)]
     (concat-byte-arrays result (format-params (extract-uri first-line)))))
 
 ;------------------------------------
