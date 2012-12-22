@@ -2,7 +2,8 @@
 	(:use [clojure.string :only (split)]))
 
 (defn elements [line]
-    (split line #"\s+"))
+	(if (seq line)
+    (split line #"\s+")))
 
 (defn extract-command [line]
     (first (elements line)))

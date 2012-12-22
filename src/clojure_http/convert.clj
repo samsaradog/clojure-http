@@ -110,7 +110,9 @@
                           is-post? response-to-post))
 
 (defn convert [content root] 
-    (let [first-line (first content)]
-
-         (first (for [f (keys controller) :when (f first-line)] 
-              ((get controller f) content root)))))
+    (cond (seq (first content))
+		(let [first-line (first content)]
+          (or (first (for [f (keys controller) :when (f first-line)] 
+              ((get controller f) content root)))
+			success-header))
+		:else success-header))

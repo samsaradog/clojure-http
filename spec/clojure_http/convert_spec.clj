@@ -25,6 +25,14 @@
 	(it "should have 301 for redirect"
 	 	(should-contain redirect-code (convert-to-string redirect-header)))
 	
+    (it "should convert nil to success"
+        (should-contain success-code 
+			(convert-to-string (convert nil ""))))
+
+    (it "should convert a bad string to success"
+        (should-contain success-code 
+			(convert-to-string (convert '["bad string"] ""))))
+
     (it "should convert a simple get to success"
         (should-contain success-code 
 			(convert-to-string (convert '["GET / HTTP/1.1\n"] ""))))

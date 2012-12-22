@@ -1,6 +1,6 @@
 (ns clojure-http.connect
 	(:use [clojure-http.convert]))
-	
+
 (defn filter-content [input output root]
     (def line nil)
     (def lines '[])
