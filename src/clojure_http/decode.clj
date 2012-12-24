@@ -26,7 +26,8 @@
 ))
 
 (defn decode [string]
-	(loop [result string map-keys (keys url-decode-map)]
+	(loop [result string 
+	       map-keys (keys url-decode-map)]
 		(if (empty? map-keys)
 			result
 			(recur (replace result (first map-keys) 

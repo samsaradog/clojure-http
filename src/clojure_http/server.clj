@@ -11,22 +11,21 @@
 	(. socket getOutputStream))
 
 (defn create-socket [port]
-;	(let (new-socket (new ServerSocket port))))
 	(new ServerSocket port))
 	
 (defn launch-connector [socket connector root]
 	(let [input  (create-reader socket)
-          output (create-writer socket)
-		  worker (agent nil)]
+          output (create-writer socket)]
 		(connector input output root)))
 
 (defn connect-input-and-output [server-socket connector root]
     (let [socket (. server-socket accept)]
-		(. socket setSendBufferSize (Math/pow 2 22))
     	(.start (Thread. #(launch-connector socket connector root)))))
 
 (defn start-server [port connector root]
     (let [server-socket (create-socket port)]
         (while (not (. server-socket isClosed))
-            (connect-input-and-output server-socket connector root))))
+           (try
+              (connect-input-and-output server-socket connector root)
+            (catch SocketException e)))))
 
