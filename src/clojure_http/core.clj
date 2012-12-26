@@ -4,7 +4,9 @@
 	(:use [clojure-http.connect]))
 
 (defn -main [ & args]
-	(let [ arg-map (apply hash-map args)
-	       port (read-string (get arg-map "-p"))
-	       root (get arg-map "-d")]
-		(start-server port filter-content root)))
+	(let [arg-map (apply hash-map args)
+	      port-string (get arg-map "-p")
+	      root (get arg-map "-d")]
+		(if (or (nil? port-string)(nil? root))
+		(println "usage: -p <port number> -d <root directory>")
+		(start-server (read-string port-string) filter-content root))))
